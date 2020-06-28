@@ -27,7 +27,7 @@ import com.pig4cloud.pig.admin.service.SysRoleService;
 import com.pig4cloud.pig.common.core.util.R;
 import com.pig4cloud.pig.common.log.annotation.SysLog;
 import io.swagger.annotations.Api;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,16 +38,17 @@ import javax.validation.Valid;
  * @date 2019/2/1
  */
 @RestController
-@AllArgsConstructor
+@RequiredArgsConstructor
 @RequestMapping("/role")
 @Api(value = "role", tags = "角色管理模块")
 public class RoleController {
+
 	private final SysRoleService sysRoleService;
+
 	private final SysRoleMenuService sysRoleMenuService;
 
 	/**
 	 * 通过ID查询角色信息
-	 *
 	 * @param id ID
 	 * @return 角色信息
 	 */
@@ -58,7 +59,6 @@ public class RoleController {
 
 	/**
 	 * 添加角色
-	 *
 	 * @param sysRole 角色信息
 	 * @return success、false
 	 */
@@ -71,7 +71,6 @@ public class RoleController {
 
 	/**
 	 * 修改角色
-	 *
 	 * @param sysRole 角色信息
 	 * @return success/false
 	 */
@@ -84,7 +83,6 @@ public class RoleController {
 
 	/**
 	 * 删除角色
-	 *
 	 * @param id
 	 * @return
 	 */
@@ -97,7 +95,6 @@ public class RoleController {
 
 	/**
 	 * 获取角色列表
-	 *
 	 * @return 角色列表
 	 */
 	@GetMapping("/list")
@@ -107,7 +104,6 @@ public class RoleController {
 
 	/**
 	 * 分页查询角色信息
-	 *
 	 * @param page 分页对象
 	 * @return 分页对象
 	 */
@@ -118,7 +114,6 @@ public class RoleController {
 
 	/**
 	 * 更新角色菜单
-	 *
 	 * @param roleVo 角色对象
 	 * @return success、false
 	 */
@@ -127,7 +122,7 @@ public class RoleController {
 	@PreAuthorize("@pms.hasPermission('sys_role_perm')")
 	public R saveRoleMenus(@RequestBody RoleVo roleVo) {
 		SysRole sysRole = sysRoleService.getById(roleVo.getRoleId());
-		return R.ok(sysRoleMenuService.saveRoleMenus(sysRole.getRoleCode()
-			, roleVo.getRoleId(), roleVo.getMenuIds()));
+		return R.ok(sysRoleMenuService.saveRoleMenus(sysRole.getRoleCode(), roleVo.getRoleId(), roleVo.getMenuIds()));
 	}
+
 }

@@ -25,7 +25,7 @@ import com.pig4cloud.pig.admin.api.entity.SysDept;
 import com.pig4cloud.pig.admin.api.entity.SysDeptRelation;
 import com.pig4cloud.pig.admin.mapper.SysDeptRelationMapper;
 import com.pig4cloud.pig.admin.service.SysDeptRelationService;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,33 +41,33 @@ import java.util.stream.Collectors;
  * @since 2019/2/1
  */
 @Service
-@AllArgsConstructor
-public class SysDeptRelationServiceImpl extends ServiceImpl<SysDeptRelationMapper, SysDeptRelation> implements SysDeptRelationService {
+@RequiredArgsConstructor
+public class SysDeptRelationServiceImpl extends ServiceImpl<SysDeptRelationMapper, SysDeptRelation>
+		implements SysDeptRelationService {
+
 	private final SysDeptRelationMapper sysDeptRelationMapper;
 
 	/**
 	 * 维护部门关系
-	 *
 	 * @param sysDept 部门
 	 */
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public void saveDeptRelation(SysDept sysDept) {
-		//增加部门关系表
+		// 增加部门关系表
 		SysDeptRelation condition = new SysDeptRelation();
 		condition.setDescendant(sysDept.getParentId());
-		List<SysDeptRelation> relationList = sysDeptRelationMapper
-			.selectList(Wrappers.<SysDeptRelation>query().lambda()
-				.eq(SysDeptRelation::getDescendant, sysDept.getParentId()))
-			.stream().map(relation -> {
-				relation.setDescendant(sysDept.getDeptId());
-				return relation;
-			}).collect(Collectors.toList());
+		List<SysDeptRelation> relationList = sysDeptRelationMapper.selectList(
+				Wrappers.<SysDeptRelation>query().lambda().eq(SysDeptRelation::getDescendant, sysDept.getParentId()))
+				.stream().map(relation -> {
+					relation.setDescendant(sysDept.getDeptId());
+					return relation;
+				}).collect(Collectors.toList());
 		if (CollUtil.isNotEmpty(relationList)) {
 			this.saveBatch(relationList);
 		}
 
-		//自己也要维护到关系表中
+		// 自己也要维护到关系表中
 		SysDeptRelation own = new SysDeptRelation();
 		own.setDescendant(sysDept.getDeptId());
 		own.setAncestor(sysDept.getDeptId());
@@ -76,7 +76,6 @@ public class SysDeptRelationServiceImpl extends ServiceImpl<SysDeptRelationMappe
 
 	/**
 	 * 通过ID删除部门关系
-	 *
 	 * @param id
 	 */
 	@Override
@@ -86,7 +85,6 @@ public class SysDeptRelationServiceImpl extends ServiceImpl<SysDeptRelationMappe
 
 	/**
 	 * 更新部门关系
-	 *
 	 * @param relation
 	 */
 	@Override

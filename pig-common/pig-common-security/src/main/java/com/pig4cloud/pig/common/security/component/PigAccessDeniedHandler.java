@@ -28,7 +28,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pig4cloud.pig.common.core.constant.CommonConstants;
 import com.pig4cloud.pig.common.core.exception.PigDeniedException;
 import com.pig4cloud.pig.common.core.util.R;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
@@ -40,21 +40,19 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
 
 /**
- * @author lengleng
- * 授权拒绝处理器，覆盖默认的OAuth2AccessDeniedHandler
- * 包装失败信息到PigDeniedException
+ * @author lengleng 授权拒绝处理器，覆盖默认的OAuth2AccessDeniedHandler 包装失败信息到PigDeniedException
  */
 @Slf4j
 @Component
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class PigAccessDeniedHandler extends OAuth2AccessDeniedHandler {
+
 	private final ObjectMapper objectMapper;
 
 	/**
 	 * 授权拒绝处理，使用R包装
-	 *
-	 * @param request       request
-	 * @param response      response
+	 * @param request request
+	 * @param response response
 	 * @param authException authException
 	 */
 	@Override
@@ -68,4 +66,5 @@ public class PigAccessDeniedHandler extends OAuth2AccessDeniedHandler {
 		PrintWriter printWriter = response.getWriter();
 		printWriter.append(objectMapper.writeValueAsString(result));
 	}
+
 }

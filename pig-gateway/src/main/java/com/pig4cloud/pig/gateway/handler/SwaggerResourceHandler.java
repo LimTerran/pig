@@ -18,7 +18,7 @@
 
 package com.pig4cloud.pig.gateway.handler;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -32,25 +32,24 @@ import springfox.documentation.swagger.web.SwaggerResourcesProvider;
 
 /**
  * @author lengleng
- * @date 2018-07-19
- * SwaggerResourceHandler
+ * @date 2018-07-19 SwaggerResourceHandler
  */
 @Slf4j
 @Component
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class SwaggerResourceHandler implements HandlerFunction<ServerResponse> {
+
 	private final SwaggerResourcesProvider swaggerResources;
 
 	/**
 	 * Handle the given request.
-	 *
 	 * @param request the request to handler
 	 * @return the response
 	 */
 	@Override
 	public Mono<ServerResponse> handle(ServerRequest request) {
-		return ServerResponse.status(HttpStatus.OK)
-			.contentType(MediaType.APPLICATION_JSON)
-			.body(BodyInserters.fromValue(swaggerResources.get()));
+		return ServerResponse.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON)
+				.body(BodyInserters.fromValue(swaggerResources.get()));
 	}
+
 }

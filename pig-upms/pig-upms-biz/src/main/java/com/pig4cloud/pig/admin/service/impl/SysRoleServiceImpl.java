@@ -26,7 +26,7 @@ import com.pig4cloud.pig.admin.mapper.SysRoleMapper;
 import com.pig4cloud.pig.admin.mapper.SysRoleMenuMapper;
 import com.pig4cloud.pig.admin.service.SysRoleService;
 import com.pig4cloud.pig.common.core.constant.CacheConstants;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,13 +42,13 @@ import java.util.List;
  * @since 2019/2/1
  */
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> implements SysRoleService {
-	private SysRoleMenuMapper sysRoleMenuMapper;
+
+	private final SysRoleMenuMapper sysRoleMenuMapper;
 
 	/**
 	 * 通过用户ID，查询角色信息
-	 *
 	 * @param userId
 	 * @return
 	 */
@@ -59,7 +59,6 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
 
 	/**
 	 * 通过角色ID，删除角色,并清空角色菜单缓存
-	 *
 	 * @param id
 	 * @return
 	 */
@@ -67,9 +66,8 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
 	@CacheEvict(value = CacheConstants.MENU_DETAILS, allEntries = true)
 	@Transactional(rollbackFor = Exception.class)
 	public Boolean removeRoleById(Integer id) {
-		sysRoleMenuMapper.delete(Wrappers
-			.<SysRoleMenu>update().lambda()
-			.eq(SysRoleMenu::getRoleId, id));
+		sysRoleMenuMapper.delete(Wrappers.<SysRoleMenu>update().lambda().eq(SysRoleMenu::getRoleId, id));
 		return this.removeById(id);
 	}
+
 }

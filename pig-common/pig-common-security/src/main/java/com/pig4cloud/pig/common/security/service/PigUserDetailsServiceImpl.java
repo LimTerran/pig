@@ -27,7 +27,7 @@ import com.pig4cloud.pig.common.core.constant.CacheConstants;
 import com.pig4cloud.pig.common.core.constant.CommonConstants;
 import com.pig4cloud.pig.common.core.constant.SecurityConstants;
 import com.pig4cloud.pig.common.core.util.R;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.Cache;
@@ -51,14 +51,15 @@ import java.util.Set;
  */
 @Slf4j
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class PigUserDetailsServiceImpl implements UserDetailsService {
+
 	private final RemoteUserService remoteUserService;
+
 	private final CacheManager cacheManager;
 
 	/**
 	 * 用户密码登录
-	 *
 	 * @param username 用户名
 	 * @return
 	 */
@@ -78,7 +79,6 @@ public class PigUserDetailsServiceImpl implements UserDetailsService {
 
 	/**
 	 * 构建userdetails
-	 *
 	 * @param result 用户信息
 	 * @return
 	 */
@@ -96,12 +96,14 @@ public class PigUserDetailsServiceImpl implements UserDetailsService {
 			dbAuthsSet.addAll(Arrays.asList(info.getPermissions()));
 
 		}
-		Collection<? extends GrantedAuthority> authorities
-			= AuthorityUtils.createAuthorityList(dbAuthsSet.toArray(new String[0]));
+		Collection<? extends GrantedAuthority> authorities = AuthorityUtils
+				.createAuthorityList(dbAuthsSet.toArray(new String[0]));
 		SysUser user = info.getSysUser();
 
 		// 构造security用户
-		return new PigUser(user.getUserId(), user.getDeptId(), user.getUsername(), SecurityConstants.BCRYPT + user.getPassword(),
-			StrUtil.equals(user.getLockFlag(), CommonConstants.STATUS_NORMAL), true, true, true, authorities);
+		return new PigUser(user.getUserId(), user.getDeptId(), user.getUsername(),
+				SecurityConstants.BCRYPT + user.getPassword(),
+				StrUtil.equals(user.getLockFlag(), CommonConstants.STATUS_NORMAL), true, true, true, authorities);
 	}
+
 }

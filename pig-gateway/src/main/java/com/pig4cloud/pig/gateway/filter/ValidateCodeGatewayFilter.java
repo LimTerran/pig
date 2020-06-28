@@ -27,13 +27,15 @@ import com.pig4cloud.pig.common.core.exception.ValidateCodeException;
 import com.pig4cloud.pig.common.core.util.R;
 import com.pig4cloud.pig.common.core.util.WebUtils;
 import com.pig4cloud.pig.gateway.config.IgnoreClientConfiguration;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
@@ -41,15 +43,17 @@ import reactor.core.publisher.Mono;
 
 /**
  * @author lengleng
- * @date 2018/7/4
- * 验证码处理
+ * @date 2018/7/4 验证码处理
  */
 @Slf4j
 @Component
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class ValidateCodeGatewayFilter extends AbstractGatewayFilterFactory {
+
 	private final IgnoreClientConfiguration ignoreClient;
+
 	private final ObjectMapper objectMapper;
+
 	private final RedisTemplate redisTemplate;
 
 	@Override
@@ -58,8 +62,7 @@ public class ValidateCodeGatewayFilter extends AbstractGatewayFilterFactory {
 			ServerHttpRequest request = exchange.getRequest();
 
 			// 不是登录请求，直接向下执行
-			if (!StrUtil.containsAnyIgnoreCase(request.getURI().getPath()
-				, SecurityConstants.OAUTH_TOKEN_URL)) {
+			if (!StrUtil.containsAnyIgnoreCase(request.getURI().getPath(), SecurityConstants.OAUTH_TOKEN_URL)) {
 				return chain.filter(exchange);
 			}
 
@@ -76,18 +79,27 @@ public class ValidateCodeGatewayFilter extends AbstractGatewayFilterFactory {
 					return chain.filter(exchange);
 				}
 
-				//校验验证码
+				// 校验验证码
 				checkCode(request);
-			} catch (Exception e) {
+			}
+			catch (Exception e) {
 				ServerHttpResponse response = exchange.getResponse();
 				response.setStatusCode(HttpStatus.PRECONDITION_REQUIRED);
-				try {
-					return response.writeWith(Mono.just(response.bufferFactory()
-						.wrap(objectMapper.writeValueAsBytes(
-							R.failed(e.getMessage())))));
-				} catch (JsonProcessingException e1) {
-					log.error("对象输出异常", e1);
-				}
+				response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
+
+				final String errMsg = e.getMessage();
+				return response.writeWith(Mono.create(monoSink -> {
+					try {
+						byte[] bytes = objectMapper.writeValueAsBytes(R.failed(errMsg));
+						DataBuffer dataBuffer = response.bufferFactory().wrap(bytes);
+
+						monoSink.success(dataBuffer);
+					}
+					catch (JsonProcessingException jsonProcessingException) {
+						log.error("对象输出异常", jsonProcessingException);
+						monoSink.error(jsonProcessingException);
+					}
+				}));
 			}
 
 			return chain.filter(exchange);
@@ -96,7 +108,6 @@ public class ValidateCodeGatewayFilter extends AbstractGatewayFilterFactory {
 
 	/**
 	 * 检查code
-	 *
 	 * @param request
 	 */
 	@SneakyThrows
@@ -136,4 +147,5 @@ public class ValidateCodeGatewayFilter extends AbstractGatewayFilterFactory {
 
 		redisTemplate.delete(key);
 	}
+
 }
